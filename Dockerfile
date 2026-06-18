@@ -34,7 +34,6 @@ RUN npx prisma generate
 
 # Copy built application
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.mjs ./
 
 # Create directory for SQLite database
