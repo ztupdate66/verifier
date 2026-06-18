@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model EmailEntry {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  domain          String
+  formatValid     Boolean  @default(false)
+  domainExists    Boolean  @default(false)
+  mxRecords       String?  // JSON array
+  isKonsoleh      Boolean  @default(false)
+  konsolehServer  String?  // which konsoleH/xneelo/hetzner server
+  smtpVerified    Boolean  @default(false)
+  verifiedAt      DateTime @default(now())
+  notes           String?
+}
+
+model VerificationSession {
+  id         String   @id @default(cuid())
+  name       String
+  totalCount Int
+  konsolehCount Int   @default(0)
+  validCount    Int   @default(0)
+  createdAt  DateTime @default(now())
+}
