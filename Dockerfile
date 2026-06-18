@@ -19,6 +19,9 @@ RUN npx prisma generate
 # Build Next.js
 RUN npm run build
 
+# Create start script
+RUN printf '#!/bin/sh\nnpx prisma db push --skip-generate\nexec node_modules/.bin/next start\n' > /app/start.sh && chmod +x /app/start.sh
+
 # Production stage
 FROM node:22-alpine AS runner
 
@@ -35,6 +38,7 @@ RUN npx prisma generate
 # Copy built application
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.mjs ./
+COPY --from=builder /app/start.sh ./start.sh
 
 # Create directory for SQLite database
 RUN mkdir -p /app/data
@@ -42,9 +46,8 @@ RUN mkdir -p /app/data
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Initialize database on startup
+# Copy Prisma migrations for runtime db push
 COPY --from=builder /app/prisma ./prisma
-RUN echo '#!/bin/sh\nnpx prisma db push --skip-generate\nexec node_modules/.bin/next start' > /app/start.sh && chmod +x /app/start.sh
 
 EXPOSE 3000
 
