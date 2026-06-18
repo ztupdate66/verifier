@@ -19,6 +19,9 @@ RUN npx prisma generate
 # Build Next.js
 RUN npm run build
 
+# Create startup script
+RUN printf '#!/bin/sh\nnpx prisma db push --skip-generate\nexec node_modules/.bin/next start\n' > /app/start.sh && chmod +x /app/start.sh
+
 # Production stage
 FROM node:22-alpine AS runner
 
@@ -44,7 +47,7 @@ ENV PORT=3000
 
 # Initialize database on startup
 COPY --from=builder /app/prisma ./prisma
-RUN echo '#!/bin/sh\nnpx prisma db push --skip-generate\nexec node_modules/.bin/next start' > /app/start.sh && chmod +x /app/start.sh
+COPY --from=builder /app/start.sh ./start.sh
 
 EXPOSE 3000
 
